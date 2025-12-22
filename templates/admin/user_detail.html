@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }}的详情页{% endblock %}
+
+{% block content %}
+<style>
+/* 自定义样式 */
+.card-custom {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+.card-header-custom {
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.table-responsive {
+    margin-top: 1rem;
+}
+.progress {
+    height: 20px !important;
+}
+.progress-bar {
+    font-size: 12px;
+    line-height: 20px;
+}
+</style>
+
+<div class="container mt-4">
+    <div class="card card-custom">
+        <div class="card-header card-header-custom bg-primary text-white">
+            <h5 class="mb-0">{{ user.username }} 的基本信息</h5> 
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>用户姓名：</strong> {{ user.username }}</p> 
+                    <p><strong>用户 ID：</strong> {{ user.id }}</p> 
+                    <p><strong>用户角色：</strong> 
+                        {% if user.role == 0 %}学生
+                        {% elif user.role == 1 %}教师
+                        {% else %}管理员
+                        {% endif %}
+                    </p>
+                    <p><strong>注册时间：</strong> {{ user.create_time.strftime('%Y-%m-%d %H:%M') if user.create_time else '无' }}</p> 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.role == 1 %}
+    
+    <div class="card card-custom">
+        <div class="card-header card-header-custom bg-info text-white">
+            <h5 class="mb-0">研究方向</h5>
+        </div>
+        <div class="card-body">
+            <p>{{ research_direction if research_direction else '暂无研究方向信息。' }}</p>
+        </div>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-header card-header-custom bg-success text-white">
+            <h5 class="mb-0">开设课程</h5>
+        </div>
+        <div class="card-body">
+            {% if taught_courses %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>课程ID</th>
+                                <th>课程名称</th>
+                                <th>学分</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in taught_courses %}
+                                <tr>
+                                    <td>{{ course.id }}</td>
+                                    <td>{{ course.name }}</td>
+                                    <td>{{ course.credit }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">该教师暂未开设任何课程。</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% elif user.role == 0 %}
+    
+    <div class="card card-custom">
+        <div class="card-header card-header-custom bg-success text-white">
+            <h5 class="mb-0">已选课程</h5>
+        </div>
+        <div class="card-body">
+            {% if courses %} 
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>课程名称</th>
+                                <th>学分</th>
+                                <th>成绩</th>
+                                <th>绩点</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in courses %} 
+                                <tr>
+                                    <td>{{ course.name }}</td>
+                                    <td>{{ course.credit }}</td>
+                                    <td>{{ course.score if course.score else '未评分' }}</td>
+                                    <td>{{ course.grade_point if course.score else '-' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">暂无已选课程</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-header card-header-custom bg-info text-white">
+            <h5 class="mb-0">已掌握技能</h5>
+            <a href="{{ url_for('admin.add_student_skill', student_id=user.id) }}" 
+               class="btn btn-sm btn-light">添加技能</a>
+        </div>
+        <div class="card-body">
+            {% if skills %} 
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>技能名称</th>
+                                <th>当前等级</th>
+                                <th>目标等级</th>
+                                <th>进度</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for skill in skills %} 
+                                <tr>
+                                    <td>{{ skill.name }}</td>
+                                    <td>
+                                        {% if skill.current_level == 1 %}入门
+                                        {% elif skill.current_level == 2 %}基础
+                                        {% elif skill.current_level == 3 %}熟练
+                                        {% elif skill.current_level == 4 %}精通
+                                        {% elif skill.current_level == 5 %}专家{% endif %}
+                                        ({{ skill.current_level }}级)
+                                    </td>
+                                    <td>
+                                        {% if skill.target_level == 1 %}入门
+                                        {% elif skill.target_level == 2 %}基础
+                                        {% elif skill.target_level == 3 %}熟练
+                                        {% elif skill.target_level == 4 %}精通
+                                        {% elif skill.target_level == 5 %}专家{% endif %}
+                                        ({{ skill.target_level }}级)
+                                    </td>
+                                    <td>
+                                        {% set progress = (skill.current_level / skill.target_level * 100) if skill.target_level and skill.target_level != 0 else 0 %}
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ progress }}%" 
+                                                 aria-valuenow="{{ skill.current_level }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="{{ skill.target_level }}">
+                                                 {{ progress|int }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td> 
+                                        <a href="{{ url_for('admin.edit_student_skill', skill_id=skill.id) }}" 
+                                           class="btn btn-sm btn-warning me-2">修改</a>
+                                        <form action="{{ url_for('admin.delete_student_skill', skill_id=skill.id) }}" 
+                                                  method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('确定删除【{{ skill.name }}】技能吗？')">删除</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">暂无已掌握技能，点击「添加技能」按钮新增</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

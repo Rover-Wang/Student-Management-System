@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}为 {{ student.username }} 添加技能{% endblock %}
+
+{% block content %}
+<style>
+.add-skill-card {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    max-width: 700px;
+    margin: 0 auto;
+}
+.add-skill-header {
+    border-radius: 8px 8px 0 0;
+    background-color: #28a745;
+    color: white;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 16px;
+}
+.form-label {
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+.error-tip {
+    font-size: 12px;
+    color: #dc3545;
+    margin-top: 4px;
+}
+.btn-group {
+    margin-top: 20px;
+}
+</style>
+
+<div class="container mt-4">
+    <div class="card add-skill-card">
+        <div class="add-skill-header">
+            为学生添加技能 · {{ student.username }}（学号：{{ student.id }}）
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control", placeholder="例：Python编程、Java开发、数据分析") }}
+                    {% if form.name.errors %}
+                        {% for error in form.name.errors %}
+                            <div class="error-tip">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.current_level.label(class="form-label") }}
+                    {{ form.current_level(class="form-select") }}
+                    {% if form.current_level.errors %}
+                        {% for error in form.current_level.errors %}
+                            <div class="error-tip">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.target_level.label(class="form-label") }}
+                    {{ form.target_level(class="form-select") }}
+                    {% if form.target_level.errors %}
+                        {% for error in form.target_level.errors %}
+                            <div class="error-tip">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="btn-group d-flex gap-2">
+                    {{ form.submit(class="btn btn-primary flex-grow-1") }}
+                    
+                    {# 💥 关键修复点：将 student_detail 改为 user_detail，并将 student_id 改为 user_id #}
+                    <a href="{{ url_for('admin.user_detail', user_id=student.id) }}" 
+                       class="btn btn-secondary flex-grow-1">取消</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

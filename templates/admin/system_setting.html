@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}系统设置 - 系统管理后台{% endblock %}
+
+{% block content_title %}系统设置{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">基础配置</div>
+    <div class="card-body">
+        <form>
+            <div class="mb-3">
+                <label class="form-label">站点名称</label>
+                <input type="text" class="form-control" value="学习管理系统" disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">默认用户角色</label>
+                <select class="form-select" disabled>
+                    <option>学生（role=0）</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">调试模式</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" checked disabled>
+                    <label class="form-check-label">开启（仅开发环境）</label>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" disabled>保存设置</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

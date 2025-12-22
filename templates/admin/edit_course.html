@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}编辑课程{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow mb-4" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">编辑课程信息</h6>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                
+                <!-- 课程名称 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">课程名称</label>
+                    <input type="text" name="name" class="form-control" value="{{ course.name }}" required>
+                </div>
+
+                <!-- 学分 -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">学分</label>
+                    <input type="number" step="0.5" name="credit" class="form-control" value="{{ course.credit }}" required>
+                </div>
+
+                <!-- 指派老师 (下拉菜单) -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold text-success">
+                        <i class="fas fa-chalkboard-teacher me-1"></i> 指派任课教师
+                    </label>
+                    <select name="teacher_id" class="form-select">
+                        <option value="0">-- 不指定 / 暂无 --</option>
+                        {% for teacher in teachers %}
+                            <option value="{{ teacher.id }}" 
+                                {% if course.teacher_id == teacher.id %}selected{% endif %}>
+                                {{ teacher.username }} (ID: {{ teacher.id }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="form-text">只有账号角色为“教师”的用户才会显示在此处。</div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{{ url_for('admin.course_manage') }}" class="btn btn-secondary me-md-2">取消</a>
+                    <button type="submit" class="btn btn-primary">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

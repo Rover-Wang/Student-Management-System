@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}课程详情{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">课程详情：{{ course.name }}</h1>
+        <a href="{{ url_for('admin.course_manage') }}" class="btn btn-sm btn-secondary">
+            <i class="bi bi-arrow-left"></i> 返回列表
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- 左侧：课程基本信息 -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">基本信息</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>课程 ID：</strong> {{ course.id }}</p>
+                    <p><strong>课程名称：</strong> {{ course.name }}</p>
+                    <p><strong>学分：</strong> {{ course.credit }}</p>
+                    <p><strong>任课教师：</strong> 
+                        {% if course.teacher %}
+                            <span class="badge bg-success">{{ course.teacher.username }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">待指派</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>创建时间：</strong> {{ course.create_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：选课学生名单 -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <!-- 这里使用的是 students 列表的长度 -->
+                    <h6 class="m-0 font-weight-bold text-primary">选课学生名单 ({{ students|length }}人)</h6>
+                </div>
+                <div class="card-body">
+                    {% if students %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>学生ID</th>
+                                    <th>学生姓名</th>
+                                    <th>用户角色</th>
+                                    <th>加入时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 遍历后端传来的 students 列表 -->
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.id }}</td>
+                                    <td>
+                                        <i class="bi bi-person-circle me-2 text-gray-400"></i>
+                                        {{ student.username }}
+                                    </td>
+                                    <td><span class="badge bg-info">学生</span></td>
+                                    <!-- 选课关联表没有存时间，这里显示用户注册时间，或者留空 -->
+                                    <td>{{ student.create_time.strftime('%Y-%m-%d') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-people-fill display-4 mb-3 d-block"></i>
+                            <p>暂无学生选修此课程</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

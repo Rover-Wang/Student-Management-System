@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}修改{{ student.username }}的{{ skill.name }}技能{% endblock %}
+
+{% block content %}
+<style>
+/* 自定义样式，与学生详情页风格统一 */
+.card-custom {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+.card-header-custom {
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    padding: 12px 16px;
+    background-color: #ffc107;
+    color: #212529;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+</style>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <!-- 技能修改卡片 -->
+            <div class="card card-custom">
+                <div class="card-header card-header-custom">
+                    <h5 class="mb-0">修改学生技能</h5>
+                </div>
+                <div class="card-body p-4">
+                    <!-- 学生信息提示 -->
+                    <div class="alert alert-info mb-4">
+                        <small>
+                            <strong>学生信息：</strong>{{ student.username }}（学号：{{ student.id }}）<br>
+                            <strong>当前技能：</strong>{{ skill.name }}
+                        </small>
+                    </div>
+
+                    <!-- 技能修改表单 -->
+                    <form method="POST">
+                        <!-- CSRF令牌（必须加，兼容Flask-WTF） -->
+                        {{ form.hidden_tag() }}
+
+                        <!-- 技能名称输入框 -->
+                        <div class="mb-3">
+                            {{ form.name.label(class="form-label fw-medium") }}
+                            {{ form.name(class="form-control", placeholder="请输入技能名称") }}
+                            <!-- 表单验证错误提示 -->
+                            {% if form.name.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.name.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 当前等级下拉框 -->
+                        <div class="mb-3">
+                            {{ form.current_level.label(class="form-label fw-medium") }}
+                            {{ form.current_level(class="form-select") }}
+                            {% if form.current_level.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.current_level.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 目标等级下拉框 -->
+                        <div class="mb-3">
+                            {{ form.target_level.label(class="form-label fw-medium") }}
+                            {{ form.target_level(class="form-select") }}
+                            {% if form.target_level.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.target_level.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- 提交/取消按钮 -->
+                        <div class="d-flex gap-2 mt-4">
+                            {{ form.submit(class="btn btn-primary flex-grow-1") }}
+                            <a href="{{ url_for('admin.student_detail', student_id=student.id) }}" 
+                               class="btn btn-secondary flex-grow-1">取消</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

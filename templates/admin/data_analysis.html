@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}数据统计 - 系统管理后台{% endblock %}
+
+{% block content_title %}数据统计{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <!-- 角色统计卡片 -->
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h6>学生数量</h6>
+                <p class="display-4">{{ student_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h6>教师数量</h6>
+                <p class="display-4">{{ teacher_count }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h6>管理员数量</h6>
+                <p class="display-4">{{ admin_count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 课程/技能统计 -->
+    <div class="col-12 mt-4">
+        <div class="card">
+            <div class="card-header">资源统计</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>课程总数</h6>
+                        <p class="fs-3">{{ course_count }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>技能总数</h6>
+                        <p class="fs-3">{{ skill_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

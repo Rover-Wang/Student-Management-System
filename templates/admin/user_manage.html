@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}用户管理 - 系统管理后台{% endblock %}
+
+{% block content_title %}用户列表{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">用户列表</h5>
+                {# 按钮触发模态框 #}
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    新增用户
+                </button>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>用户名</th>
+                            <th>角色</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in all_users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                {% if user.role == 0 %}
+                                    <span class="badge bg-info">学生</span>
+                                {% elif user.role == 1 %}
+                                    <span class="badge bg-success">教师</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">管理员</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {# 💥 关键修复点：统一详情链接 for role 0 和 1 #}
+                                {% if user.role == 0 or user.role == 1 %}
+                                    <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" class="btn btn-info btn-sm">详情</a>
+                                    
+                                    {# 删除表单：适用于学生和教师 #}
+                                    <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display:inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('确定删除用户【{{ user.username }}】吗？');">删除</button>
+                                    </form>
+                                    
+                                {% else %}
+                                    {# 管理员操作 #}
+                                    <span class="text-muted">不可操作</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ---------------------- 新增：新增用户模态框 (Modal) ---------------------- #}
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addUserModalLabel">新增用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            {# 表单提交到原来的 add_user 路由 #}
+            <form method="POST" action="{{ url_for('admin.add_user') }}">
+                <div class="modal-body">
+                    {% if form %}
+                        {{ form.hidden_tag() }}
+                        
+                        {# 用户名 #}
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control") }}
+                        </div>
+
+                        {# 密码 #}
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control") }}
+                        </div>
+
+                        {# 确认密码 #}
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {{ form.confirm_password(class="form-control") }}
+                        </div>
+
+                        {# 角色选择 #}
+                        <div class="mb-3">
+                            {{ form.role.label(class="form-label") }}
+                            {{ form.role(class="form-select") }}
+                        </div>
+                    {% else %}
+                        <p class="text-danger">无法加载用户表单。</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    {% if form %}
+                        {{ form.submit(class="btn btn-primary") }}
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{# ---------------------------------------------------------------- #}
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    {# JavaScript：如果存在 'danger' 级别的闪现消息 (即表单验证失败)，则自动打开模态框 #}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var hasDangerFlash = document.querySelector('.alert-danger');
+            if (hasDangerFlash) {
+                var addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+                addUserModal.show();
+            }
+        });
+    </script>
+{% endblock %}

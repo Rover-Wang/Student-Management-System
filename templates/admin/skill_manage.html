@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}技能管理{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 页面标题和添加按钮（修复：改为模态框触发） -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">技能库管理</h1>
+        <!-- 修复：按钮改为触发模态框，而非直接跳转 -->
+        <button type="button" class="btn btn-sm btn-success shadow-sm" data-bs-toggle="modal" data-bs-target="#addSkillModal">
+            <i class="bi bi-plus-lg"></i> 添加新技能
+        </button>
+    </div>
+
+    <!-- 技能列表卡片 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">公共技能列表</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 10%">ID</th>
+                            <th>技能名称</th>
+                            <th style="width: 20%">创建时间</th>
+                            <th style="width: 15%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- 修复：使用 public_skills 变量（和路由返回的一致） -->
+                        {% if public_skills and public_skills|length > 0 %}
+                            {% for skill in public_skills %}
+                            <tr>
+                                <td>{{ skill.id }}</td>
+                                <td class="fw-bold text-primary">{{ skill.name }}</td>
+                                <td>{{ skill.create_time.strftime('%Y-%m-%d %H:%M') if skill.create_time else '-' }}</td>
+                                <td>
+                                    <!-- 删除按钮（POST请求，兼容路由） -->
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="deleteSkill({{ skill.id }})">
+                                        <i class="bi bi-trash"></i> 删除
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    暂无技能，请点击右上角添加。
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加技能模态框（核心：表单提交到add_skill路由） -->
+<div class="modal fade" id="addSkillModal" tabindex="-1" aria-labelledby="addSkillModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_skill') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSkillModalLabel">添加公共技能</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="skillName" class="form-label">技能名称</label>
+                        <input type="text" class="form-control" id="skillName" name="skill_name" 
+                               placeholder="例如：Python、Java、数据分析" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-primary">确认添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 删除技能JS逻辑（核心修复：动态拼接skill_id） -->
+<script>
+    // 删除技能函数（适配admin.py的delete_skill路由）
+    function deleteSkill(skillId) {
+        if (confirm('确定要删除该技能吗？删除后无法恢复！')) {
+            // 核心修复：动态拼接skill_id到URL中
+            const deleteUrl = "{{ url_for('admin.delete_skill', skill_id=0) }}".replace('0', skillId);
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 200) {
+                    alert(data.msg);
+                    window.location.reload(); // 刷新列表
+                } else {
+                    alert('删除失败：' + data.msg);
+                }
+            })
+            .catch(error => {
+                alert('删除失败：网络错误，请重试！');
+                console.error('删除技能错误：', error);
+            });
+        }
+    }
+
+    // 表单提交成功后的提示（可选）
+    document.addEventListener('DOMContentLoaded', function() {
+        // 检测flash消息（如果有）
+        const flashMessages = document.querySelectorAll('.alert');
+        if (flashMessages.length > 0) {
+            // 3秒后自动关闭flash消息
+            setTimeout(() => {
+                flashMessages.forEach(msg => msg.remove());
+            }, 3000);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h3>课程管理</h3>
+  <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary mb-3">添加课程</a>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>课程名称</th>
+        <th>学分</th>
+        <th>授课教师</th>
+        <th>选课人数</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for course in courses %}
+      <tr>
+        <td>{{ course.id }}</td>
+        <td>{{ course.name }}</td>
+        <td>{{ course.credit }}</td>
+        <td>{{ course.teacher_name if course.teacher_name else '未分配' }}</td>
+        <!-- 🔥 唯一正确写法：用提前计算的 student_count，无任何方法调用 -->
+        <td><span class="badge bg-info">{{ course.student_count }} 人</span></td>
+        <td>{{ course.create_time.strftime('%Y-%m-%d %H:%M') if course.create_time else '-' }}</td>
+        <td>
+          <a href="{{ url_for('admin.course_detail', course_id=course.id) }}" class="btn btn-sm btn-info">详情</a>
+          <a href="{{ url_for('admin.edit_course', course_id=course.id) }}" class="btn btn-sm btn-warning">编辑</a>
+          <button class="btn btn-sm btn-danger delete-btn" data-id="{{ course.id }}" data-name="{{ course.name }}">删除</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+$('.delete-btn').click(function() {
+  const courseId = $(this).data('id');
+  const courseName = $(this).data('name');
+  if (confirm(`确认删除课程【${courseName}】吗？`)) {
+    $.post(`/course/delete/${courseId}`, function(res) {
+      if (res.code === 200) {
+        alert(res.msg);
+        window.location.reload();
+      } else {
+        alert(res.msg);
+      }
+    }).fail(function() {
+      alert('删除请求失败，请重试！');
+    });
+  }
+});
+</script>
+{% endblock %}

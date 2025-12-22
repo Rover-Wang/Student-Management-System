@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}管理首页 - 系统管理后台{% endblock %}
+
+{% block content_title %}管理首页{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="card-title">学生总数</h6>
+                <p class="display-4">{{ total_students }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="card-title">课程总数</h6>
+                <p class="display-4">{{ total_courses }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="card-title">技能总数</h6>
+                <p class="display-4">{{ total_skills }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 mt-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">快速操作</h6>
+            </div>
+            <div class="card-body d-flex gap-3">
+                <a href="{{ url_for('admin.add_course') }}" class="btn btn-primary">
+                    <i class="bi bi-book me-2"></i> 添加课程
+                </a>
+                <a href="{{ url_for('admin.add_skill') }}" class="btn btn-success">
+                    <i class="bi bi-bar-chart me-2"></i> 添加技能
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if time_labels %}
+    <div class="col-12 mt-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h6 class="mb-0">学生注册趋势</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="studentTrendChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% if time_labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('studentTrendChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ time_labels|tojson }},
+            datasets: [{
+                label: '新增学生数',
+                data: {{ time_data|tojson }},
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
