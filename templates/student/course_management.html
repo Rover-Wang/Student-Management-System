@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}课程管理 - 学生中心{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card bg-primary text-white shadow-sm mb-4">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="opacity-75">当前平均绩点 (GPA)</h5>
+                {% set stats = namespace(credits=0, points=0) %}
+                {% for en in enrollments %}
+                    {% if en.score is not none %}
+                        {% set stats.credits = stats.credits + en.course.credit %}
+                        {% set stats.points = stats.points + (en.grade_point * en.course.credit) %}
+                    {% endif %}
+                {% endfor %}
+                {% set gpa = (stats.points / stats.credits) if stats.credits > 0 else 0 %}
+                <h2 class="display-5 fw-bold mb-0">
+                    {{ "%.2f"|format(gpa) if gpa > 0 else '暂无数据' }}
+                </h2>
+            </div>
+            <i class="bi bi-award fs-1 opacity-50"></i>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>选课大厅 (所有开放课程)</h5>
+        </div>
+        <div class="card-body">
+            <form action="{{ url_for('student.select_course') }}" method="POST">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>选择</th>
+                                <th>课程名称</th>
+                                <th>学分</th>
+                                <th>任课老师</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in all_courses %}
+                            <tr>
+                                <td>
+                                    {% if course.id not in selected_course_ids %}
+                                    <input type="checkbox" name="course_ids" value="{{ course.id }}">
+                                    {% else %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.credit }}</td>
+                                <td>{{ course.teacher.username if course.teacher else '未知' }}</td>
+                                <td>
+                                    {% if course.id in selected_course_ids %}
+                                    <span class="badge bg-secondary">已在清单中</span>
+                                    {% else %}
+                                    <span class="badge bg-outline-primary text-primary border border-primary">可选</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm mt-2">确认选课</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h5 class="mb-0 text-dark"><i class="bi bi-journal-check me-2 text-primary"></i>已选课程明细 & 成绩</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">课程名称</th>
+                        <th>学分</th>
+                        <th>成绩 (教师录入)</th>
+                        <th>绩点</th>
+                        <th class="text-end pe-4">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {# 💡 关键：循环渲染 enrollments 对象 #}
+                    {% for en in enrollments %}
+                    <tr>
+                        <td class="ps-4"><strong>{{ en.course.name }}</strong></td>
+                        <td>{{ en.course.credit }}</td>
+                        <td>
+                            {% if en.score is not none %}
+                                <span class="badge {% if en.score >= 60 %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ en.score }} 分
+                                </span>
+                            {% else %}
+                                <span class="text-muted small italic">待老师录入</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-bold {{ 'text-primary' if en.grade_point > 0 else 'text-muted' }}">
+                                {{ "%.1f"|format(en.grade_point) if en.score is not none else '-' }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            {# 反馈链接 #}
+                            <a href="{{ url_for('student.send_feedback_to_teacher', recipient_id=en.course.teacher_id, subject='关于《' ~ en.course.name ~ '》的反馈') }}" 
+                               class="btn btn-sm btn-outline-info me-2">反馈</a>
+                            {# 退课链接 #}
+                            <a href="{{ url_for('student.drop_course', course_id=en.course_id) }}" 
+                               class="btn btn-sm btn-outline-danger" onclick="return confirm('确定退课吗？成绩也将被删除')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            暂无已选课程，请在上方“选课大厅”进行选课。
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}学生首页 - 概览{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/student_style.css') }}">
+<script src="{{ url_for('static', filename='js/common_scripts.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="mb-5 animate__animated animate__fadeIn">
+        <h2 class="fw-bolder text-dark mb-1">欢迎回来，{{ current_user.username }}！</h2>
+        <p class="text-secondary fs-6">这里是你的学习管理中心，开始高效学习吧 <i class="bi bi-rocket-takeoff-fill text-primary"></i></p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card stat-card bg-primary-soft text-primary card-hover-shadow border-0">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title fw-bold">已选课程 <i class="bi bi-book-fill ms-2"></i></h5>
+                    <p class="display-4 fw-bolder mb-0">{{ course_count }}</p>
+                    <p class="text-muted small">门</p>
+                    <a href="{{ url_for('student.course_management') }}" class="stretched-link text-primary small opacity-75 fw-bold">前往课程管理 <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-success-soft text-success card-hover-shadow border-0">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title fw-bold">已掌握技能 <i class="bi bi-tools ms-2"></i></h5>
+                    <p class="display-4 fw-bolder mb-0">{{ skill_count }}</p>
+                    <p class="text-muted small">项</p>
+                    <a href="{{ url_for('student.skill_management') }}" class="stretched-link text-success small opacity-75 fw-bold">前往技能管理 <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-info-soft text-info card-hover-shadow border-0">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <h5 class="card-title fw-bold">待办计划 <i class="bi bi-list-task ms-2"></i></h5>
+                    <p class="display-4 fw-bolder mb-0">{{ pending_plans_count }}</p>
+                    <p class="text-muted small">个</p>
+                    <a href="{{ url_for('student.plan_management') }}" class="stretched-link text-info small opacity-75 fw-bold">查看待办事项 <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-md-6" id="study-plan-section">
+            <div class="card card-modern border-0 shadow-lg">
+                <div class="card-header bg-primary text-white border-0 py-3 rounded-top">
+                    <h5 class="mb-0 fw-bold">📌 最新学习计划</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if study_plans %}
+                        <div class="list-group gap-3">
+                            {% for plan in study_plans %}
+                                <div class="list-group-item list-group-item-action p-3 rounded-3 shadow-sm plan-item-hover">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <h6 class="fw-bold mb-1 text-dark">{{ plan.title }}</h6>
+                                        <span class="badge rounded-pill bg-{{ 'danger' if plan.deadline < current_time else 'success' }} text-uppercase">
+                                            截止：{{ plan.deadline.strftime('%Y-%m-%d') }}
+                                        </span>
+                                    </div>
+                                    <p class="mb-0 mt-2 text-secondary small text-truncate">{{ plan.content or '无详情' }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <a href="{{ url_for('student.plan_management') }}" class="btn btn-primary-outline w-100 mt-3 fw-bold">查看全部计划 & 添加新计划</a>
+                    {% else %}
+                        <div class="empty-state text-center py-5">
+                            <i class="bi bi-clipboard-plus text-primary display-4 mb-3"></i>
+                            <p class="mb-3 text-secondary">暂无学习计划，立即开始规划吧！</p>
+                            <a href="{{ url_for('student.plan_management') }}" class="btn btn-primary btn-sm">创建/管理计划</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card card-modern border-0 shadow-lg">
+                <div class="card-header bg-secondary text-white border-0 py-3 rounded-top">
+                    <h5 class="mb-0 fw-bold">📎 最近上传证明</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if certificates %}
+                        <ul class="list-group list-group-flush gap-3">
+                            {% for cert in certificates %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center rounded-3 shadow-sm cert-item-hover p-3 border">
+                                    <span class="fw-medium text-dark">{{ cert.name }}</span>
+                                    <span class="badge rounded-pill bg-{{ 'success' if cert.status == 1 else 'warning' }} text-dark text-uppercase">
+                                        {{ '已审核' if cert.status == 1 else '审核中' }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                        <a href="{{ url_for('student.certificate_management') }}" class="btn btn-secondary-outline w-100 mt-3 fw-bold">前往上传 & 查看全部</a>
+                    {% else %}
+                        <div class="empty-state text-center py-5">
+                            <i class="bi bi-cloud-upload text-secondary display-4 mb-3"></i>
+                            <p class="mb-3 text-secondary">暂无已上传证明，快去证明自己！</p>
+                            <a href="{{ url_for('student.certificate_management') }}" class="btn btn-secondary btn-sm">立即上传</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card card-modern border-0 shadow-lg">
+                <div class="card-header bg-light-gray text-dark border-0 py-3 rounded-top">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-lightbulb me-2 text-warning"></i>问题反馈</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="feedbackForm" action="/student/feedback" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <textarea class="form-control form-control-modern" name="content" rows="3" required placeholder="请输入您的问题或建议..."></textarea>
+                            <div class="invalid-feedback">请填写反馈内容</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">
+                            <i class="bi bi-send me-2"></i>提交反馈
+                        </button>
+                    </form>
+                    <div id="feedbackResult" class="mt-3 d-none alert"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

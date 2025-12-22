@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}编辑技能 - {{ skill.name }}{% endblock %}
+
+{% block content_title %}编辑技能{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">编辑技能：{{ skill.name }}</h5>
+        </div>
+        <div class="card-body p-4">
+            <form action="{{ url_for('skill.edit_skill', id=skill.id) }}" 
+                  method="POST" class="needs-validation" novalidate>
+                
+                <div class="mb-3">
+                    <label for="skillNameInput" class="form-label fw-medium">技能名称</label>
+                    <input type="text" 
+                           name="name" 
+                           id="skillNameInput"
+                           class="form-control" 
+                           value="{{ skill.name }}" 
+                           required 
+                           placeholder="例如：Python开发、Java编程">
+                    <div class="invalid-feedback">请填写有效的技能名称</div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="currentLevelSelect" class="form-label fw-medium">当前等级</label>
+                        <select name="current_level" 
+                                id="currentLevelSelect"
+                                class="form-select" 
+                                required>
+                            <option value="">请选择等级</option>
+                            {% for level in range(1, 6) %}
+                                <option value="{{ level }}" 
+                                        {% if skill.current_level == level %}selected{% endif %}>
+                                    {{ level }}级（{{ ['入门','基础','熟练','精通','专家'][level-1] }}）
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">请选择当前等级（1-5级）</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="targetLevelSelect" class="form-label fw-medium">目标等级</label>
+                        <select name="target_level" 
+                                id="targetLevelSelect"
+                                class="form-select" 
+                                required>
+                            <option value="">请选择等级</option>
+                            {% for level in range(1, 6) %}
+                                <option value="{{ level }}" 
+                                        {% if skill.target_level == level %}selected{% endif %}>
+                                    {{ level }}级（{{ ['入门','基础','熟练','精通','专家'][level-1] }}）
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">请选择目标等级（1-5级）</div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-success flex-grow-1">
+                        <i class="bi bi-check-circle me-2"></i>保存修改
+                    </button>
+                    <a href="{{ url_for('skill.student_skill') }}" 
+                       class="btn btn-secondary flex-grow-1">
+                        <i class="bi bi-arrow-left me-2"></i>取消
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    'use strict';
+    const form = document.querySelector('.needs-validation');
+    form.addEventListener('submit', e => {
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+            const invalidField = form.querySelector(':invalid');
+            if (invalidField) {
+                invalidField.focus();
+                invalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        form.classList.add('was-validated');
+    }, false);
+    
+    // 输入时移除验证状态
+    const inputs = form.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            if (form.classList.contains('was-validated')) {
+                form.classList.remove('was-validated');
+            }
+        });
+    });
+})();
+</script>
+{% endblock %}
+
+### 💡 您的下一步行动
+
+1.  **替换文件：** 用上面提供的代码替换您当前的 `templates/student/edit_skill.html`。
+2.  **更新 `base.html`：** 确保您已经根据我上一个回复的建议，将 `base.html` 中学生侧边栏的“技能追踪”菜单的高亮和链接**全部指向 `skill` 蓝图** (`skill.student_skill`)。
+3.  **重启并测试：** 重启 Flask 服务器并进行**强制刷新**（`Ctrl + Shift + R`）。
+
+这个新版本移除了所有可能产生冲突的自定义 CSS，强制使用 Bootstrap 基础类（`bg-success`，`card`，`shadow-sm`），这应该能确保页面在 Bootstrap 加载成功的情况下显示正常且美观。

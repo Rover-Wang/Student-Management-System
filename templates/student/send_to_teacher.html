@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{# 只保留一个 title 块，绝对无重复 #}
+{% block title %}发送反馈 - 学生中心{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-send me-2"></i>向任课老师提交反馈</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('student.post_feedback') }}" method="POST">
+                        <input type="hidden" name="recipient_id" value="{{ teacher.id }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">收件人：</label>
+                            <input type="text" class="form-control bg-light" value="{{ teacher.username }} 老师" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">反馈主题：</label>
+                            <input type="text" name="title" class="form-control" value="{{ subject }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">反馈内容：</label>
+                            <textarea name="content" class="form-control" rows="6" 
+                                      placeholder="请描述您对成绩或课程的异议，老师会尽快回复您..." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('student.course_management') }}" class="btn btn-outline-secondary">取消</a>
+                            <button type="submit" class="btn btn-primary px-4">立即发送</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
