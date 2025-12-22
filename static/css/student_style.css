@@ -1,0 +1,133 @@
+/* ------------------------------------------- */
+/* 1. 全局变量与配色方案 (您可以根据您的品牌色调整这里的颜色值) */
+/* ------------------------------------------- */
+:root {
+    --bs-primary: #007bff; /* 主题色 - 蓝色 */
+    --bs-success: #28a745; /* 成功色 - 绿色 */
+    --bs-info: #17a2b8;    /* 信息色 - 青色 */
+    --bs-secondary: #6c757d; /* 辅助色 - 灰色 */
+    --bs-warning: #ffc107; /* 警告色 - 黄色 */
+
+    /* 定义柔和的背景色 (关键：解决颜色诡异的问题) */
+    --bs-primary-soft: #e6f2ff; /* 浅蓝 */
+    --bs-success-soft: #eaf8ed; /* 浅绿 */
+    --bs-info-soft: #e6f6f9;    /* 浅青 */
+    --bs-light-gray: #f8f9fa;   /* 极浅灰 */
+}
+
+/* 注册柔和背景色 */
+.bg-primary-soft { background-color: var(--bs-primary-soft) !important; }
+.bg-success-soft { background-color: var(--bs-success-soft) !important; }
+.bg-info-soft { background-color: var(--bs-info-soft) !important; }
+.bg-light-gray { background-color: var(--bs-light-gray) !important; }
+
+
+/* ------------------------------------------- */
+/* 2. 统计卡片样式 (Stat Cards) */
+/* ------------------------------------------- */
+
+.stat-card {
+    border-radius: 12px;
+    height: 150px; /* 统一高度 */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* 悬停阴影效果 */
+.card-hover-shadow:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.stat-card .display-4 {
+    font-size: 3rem; /* 增大数字 */
+    line-height: 1;
+}
+
+/* 优化柔和背景下的链接和文字颜色 */
+.bg-primary-soft .text-primary { color: var(--bs-primary) !important; }
+.bg-success-soft .text-success { color: var(--bs-success) !important; }
+.bg-info-soft .text-info { color: var(--bs-info) !important; }
+
+/* ------------------------------------------- */
+/* 3. 主要内容卡片样式 (Modern Cards) */
+/* ------------------------------------------- */
+
+.card-modern {
+    border-radius: 12px;
+    overflow: hidden; /* 确保圆角显示 */
+}
+
+.card-modern .card-header {
+    padding-left: 20px;
+}
+
+/* 列表项悬停效果 */
+.plan-item-hover:hover {
+    background-color: var(--bs-primary-soft);
+    border-left: 5px solid var(--bs-primary) !important;
+    cursor: pointer;
+}
+
+.cert-item-hover:hover {
+    background-color: var(--bs-light-gray);
+    border-left: 5px solid var(--bs-secondary) !important;
+    cursor: pointer;
+}
+
+/* ------------------------------------------- */
+/* 4. 按钮和表单优化 */
+/* ------------------------------------------- */
+
+/* 边框按钮（新的柔和按钮） */
+.btn-primary-outline {
+    color: var(--bs-primary);
+    border: 2px solid var(--bs-primary);
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-outline:hover {
+    background-color: var(--bs-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.btn-secondary-outline {
+    color: var(--bs-secondary);
+    border: 2px solid var(--bs-secondary);
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-outline:hover {
+    background-color: var(--bs-secondary);
+    color: white;
+}
+
+/* 现代表单输入框 */
+.form-control-modern {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.3s;
+}
+
+.form-control-modern:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+/* ------------------------------------------- */
+/* 5. 空状态 (Empty States) */
+/* ------------------------------------------- */
+.empty-state {
+    padding: 30px 0;
+    color: #adb5bd;
+}
+
+.empty-state .bi {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+}
