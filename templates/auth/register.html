@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}用户注册{% endblock %}
+
+{% block head %}
+<!-- 引入外部样式表 -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4>用户注册</h4>
+            </div>
+            <div class="card-body">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for msg in messages %}
+                            <div class="alert alert-info">{{ msg }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                <form method="POST" action="/register">
+                    <div class="mb-3">
+                        <label>用户名</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>密码</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">注册</button>
+                </form>
+
+                <!-- 修复：直接跳转到登录页，使用url_for确保路径正确 -->
+                <div class="mt-3 text-center">
+                    <span>已有账号？</span>
+                    <a href="{{ url_for('auth.login') }}" class="text-primary">立即登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

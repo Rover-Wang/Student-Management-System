@@ -1,0 +1,19 @@
+{% extends "base.html" %}  {% block title %}个人资料{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>个人资料</h2>
+    <div class="card p-4">
+        <p><strong>用户名:</strong> {{ user.username }}</p>
+        <p><strong>角色:</strong> 
+            {% if user.role == 0 %}学生
+            {% elif user.role == 1 %}教师
+            {% elif user.role == 2 %}管理员
+            {% else %}未知
+            {% endif %}
+        </p>
+        <p><strong>注册时间:</strong> {{ user.create_time|datetimeformat("%Y-%m-%d") }}</p>
+        
+        </div>
+</div>
+{% endblock %}
