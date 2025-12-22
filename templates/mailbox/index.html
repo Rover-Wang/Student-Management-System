@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}{% if is_admin %}管理员信箱{% else %}我的信箱{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mb-0">
+                    <i class="bi bi-envelope-open me-2 text-primary"></i>{% if is_admin %}管理员信箱{% else %}我的信箱{% endif %}
+                    <span class="badge bg-secondary ms-2">{{ notifications | length }} 封</span>
+                </h3>
+                
+                {% if notifications %}
+                <div class="btn-group">
+                    <!-- 管理员隐藏“清空已读/所有”按钮 -->
+                    {% if not is_admin %}
+                    <form action="{{ url_for('student.clear_read_notifications') }}" method="POST" class="d-inline" onsubmit="return confirm('确定要删除所有【已读】消息吗？');">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-trash3 me-1"></i>清空已读
+                        </button>
+                    </form>
+                    <form action="{{ url_for('student.clear_all_notifications') }}" method="POST" class="d-inline ms-2" onsubmit="return confirm('警告：确定要清空【所有】消息吗？此操作不可恢复！');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-x-circle me-1"></i>清空所有
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- 管理员待审核证明提示（纯Jinja2原生语法，无do标签） -->
+            {% if is_admin %}
+                {% set pending_count = 0 %}  <!-- 初始化计数器 -->
+                {% for n in notifications %}
+                    {% if "待审核的学习证明" in n.title %}
+                        {% set pending_count = pending_count + 1 %}  <!-- 计数器累加 -->
+                    {% endif %}
+                {% endfor %}
+                {% if pending_count > 0 %}
+                <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    有 {{ pending_count }} 条学习证明需要审核
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            {% if notifications %}
+                <div class="list-group">
+                    {% for notif in notifications %}
+                        {% set is_unread = not notif.is_read %}
+                        <div class="list-group-item list-group-item-action {% if is_unread %}list-group-item-primary fw-bold shadow-sm{% endif %} mb-2 border rounded">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1 text-truncate">
+                                    {% if is_unread %}
+                                        <i class="bi bi-dot me-1 text-danger" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                    {% else %}
+                                        <i class="bi bi-check-circle me-1 text-success"></i>
+                                    {% endif %}
+                                    {{ notif.title }}
+                                </h6>
+                                <small class="text-muted">{{ notif.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                            </div>
+                            
+                            <p class="mb-1 text-muted small text-truncate">
+                                {{ notif.content | truncate(80) }} 
+                            </p>
+                            
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn btn-sm btn-outline-info me-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ notif.id }}" aria-expanded="false">
+                                    <i class="bi bi-eye me-1"></i>查看详情
+                                </button>
+                                
+                                {% if is_unread %}
+                                    <!-- 标记已读按钮（分支判断替代三元表达式） -->
+                                    {% if is_admin %}
+                                        <a href="{{ url_for('admin.mark_notification_read', notification_id=notif.id) }}" class="btn btn-sm btn-success">
+                                            标记为已读
+                                        </a>
+                                    {% else %}
+                                        <a href="{{ url_for('student.mark_notification_read', notification_id=notif.id) }}" class="btn btn-sm btn-success">
+                                            标记为已读
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <div class="collapse mt-3" id="collapse{{ notif.id }}">
+                                <div class="card card-body bg-light shadow-sm">
+                                    <div class="text-break mb-3" style="white-space: pre-wrap;">{{ notif.content | urlize | safe }}</div>
+                                    
+                                    <!-- 管理员专属：审核按钮 -->
+                                    {% if is_admin and "待审核的学习证明" in notif.title %}
+                                        {% set cert_id = '' %}
+                                        {% if 'cert_id=' in notif.content %}
+                                            {% set cert_id = notif.content.split('cert_id=')[1].split('&')[0] %}
+                                        {% endif %}
+                                        {% if cert_id %}
+                                        <div class="d-flex gap-2 mb-3">
+                                            <form action="{{ url_for('admin.approve_certificate', cert_id=cert_id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('确定通过该证明？')">
+                                                    <i class="bi bi-check me-1"></i>审核通过
+                                                </button>
+                                            </form>
+                                            <form action="{{ url_for('admin.reject_certificate', cert_id=cert_id) }}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('确定拒绝该证明？')">
+                                                    <i class="bi bi-x me-1"></i>审核拒绝
+                                                </button>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                    <hr>
+
+                                    <!-- 回复框（分支判断替代三元表达式） -->
+                                    <div class="reply-box bg-white p-3 rounded border mb-3">
+                                        <h6 class="text-primary mb-3"><i class="bi bi-reply-fill me-1"></i>快速回复给 {{ notif.sender.username if notif.sender else '系统/管理员' }}</h6>
+                                        {% if is_admin %}
+                                            <form action="{{ url_for('admin.reply_notification', notification_id=notif.id) }}" method="POST">
+                                        {% else %}
+                                            <form action="{{ url_for('student.reply_notification', notification_id=notif.id) }}" method="POST">
+                                        {% endif %}
+                                            <div class="mb-2">
+                                                <textarea name="reply_content" class="form-control form-control-sm" rows="3" placeholder="请输入您的回复内容..." required></textarea>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-send me-1"></i>发送回复
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- 删除按钮（分支判断替代三元表达式） -->
+                                    <div class="d-flex justify-content-between align-items-center pt-2">
+                                        <small class="text-muted">发送人: {{ notif.sender.username if notif.sender else '系统/管理员' }}</small>
+                                        
+                                        {% if is_admin %}
+                                            <form action="{{ url_for('admin.delete_notification', notification_id=notif.id) }}" method="POST" onsubmit="return confirm('确定要删除这条消息吗？');">
+                                        {% else %}
+                                            <form action="{{ url_for('student.delete_notification', notification_id=notif.id) }}" method="POST" onsubmit="return confirm('确定要删除这条消息吗？');">
+                                        {% endif %}
+                                            <button type="submit" class="btn btn-sm btn-link text-danger text-decoration-none p-0">
+                                                <i class="bi bi-trash"></i> 删除此条
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-mailbox text-muted" style="font-size: 4rem;"></i>
+                    <p class="text-muted mt-3">您的信箱是空的。</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 优化回复框样式 */
+    .reply-box {
+        transition: all 0.3s;
+    }
+    .reply-box:focus-within {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1);
+    }
+</style>
+{% endblock %}
