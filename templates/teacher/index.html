@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}教师工作台{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- 欢迎标语 -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">欢迎回来，{{ current_user.username }} 老师！</h1>
+        <span class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+            <i class="bi bi-calendar-date fa-sm text-white-50"></i> {{ "now"|datetimeformat("%Y年%m月%d日") }}
+        </span>
+    </div>
+
+    <div class="row">
+
+        <!-- 1. 研究方向设置卡片 (核心功能) -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                我的研究方向
+                            </div>
+                            
+                            <!-- 显示当前方向 -->
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 mb-3">
+                                <i class="bi bi-mortarboard-fill me-2"></i>
+                                {{ teacher_info.research_direction }}
+                            </div>
+
+                            <!-- 修改表单 (折叠式) -->
+                            <button class="btn btn-sm btn-outline-info" type="button" data-bs-toggle="collapse" data-bs-target="#editDirection" aria-expanded="false">
+                                <i class="bi bi-pencil"></i> 修改方向
+                            </button>
+
+                            <div class="collapse mt-3" id="editDirection">
+                                <form action="{{ url_for('teacher.update_info') }}" method="POST">
+                                    <div class="input-group">
+                                        <input type="text" name="research_direction" class="form-control" 
+                                               value="{{ teacher_info.research_direction }}" 
+                                               placeholder="请输入您的研究方向..." required>
+                                        <button class="btn btn-info text-white" type="submit">保存</button>
+                                    </div>
+                                    <div class="form-text small">例如：深度学习、物联网安全、云计算等</div>
+                                </form>
+                            </div>
+
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-book-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 开设课程统计卡片 -->
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                我开设的课程
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ course_count }} 门
+                            </div>
+                            <a href="{{ url_for('teacher.course_manage') }}" class="btn btn-sm btn-success mt-3">
+                                <i class="bi bi-list-ul"></i> 管理课程
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-journal-bookmark-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 下方可以放一些快捷入口 -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">快捷操作</h6>
+                </div>
+                <div class="card-body">
+                    <a href="{{ url_for('teacher.course_manage') }}" class="btn btn-primary btn-icon-split mb-2">
+                        <span class="icon text-white-50">
+                            <i class="bi bi-plus-lg"></i>
+                        </span>
+                        <span class="text">发布新课程</span>
+                    </a>
+                    <a href="{{ url_for('teacher.score_manage') }}" class="btn btn-warning btn-icon-split mb-2">
+                        <span class="icon text-white-50">
+                            <i class="bi bi-pencil-square"></i>
+                        </span>
+                        <span class="text">录入成绩</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

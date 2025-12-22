@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}成绩批改 - 教师中心{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- 消息提示 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h3 class="mb-4">成绩批改管理</h3>
+
+    <!-- 无数据提示 -->
+    {% if not score_data %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        暂无需要批改的学生成绩（请先确认有学生选了您的课程）
+    </div>
+    {% else %}
+    <!-- 成绩表格 -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">课程名称</th>
+                            <th>学生姓名</th>
+                            <th>当前成绩</th>
+                            <th class="text-end pe-4">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in score_data %}
+                        <tr>
+                            <td class="ps-4 fw-bold">{{ item.course_name }}</td>
+                            <td>{{ item.student_name }}</td>
+                            <td>
+                                <!-- 成绩输入框（加固参数绑定） -->
+                                <input type="number" 
+                                       class="form-control score-input" 
+                                       data-score-id="{{ item.score_id | default('') }}"
+                                       data-student-id="{{ item.student_id | default('') }}"
+                                       data-course-id="{{ item.course_id | default('') }}"
+                                       value="{{ item.score if item.score != '未批改' else '' }}"
+                                       min="0" max="100" step="0.5"
+                                       placeholder="输入0-100的成绩">
+                            </td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-primary save-score">保存成绩</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- 提交成绩的JS（加固版） -->
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(function() {
+    // 保存成绩按钮点击事件
+    $('.save-score').click(function() {
+        const $btn = $(this);
+        const $tr = $btn.closest('tr');
+        const $input = $tr.find('.score-input');
+        
+        // 获取参数（强制转字符串，避免undefined）
+        const scoreId = $input.data('score-id') + '' || '';
+        const studentId = $input.data('student-id') + '' || '';
+        const courseId = $input.data('course-id') + '' || '';
+        const newScore = $input.val().trim();
+
+        // 调试：打印参数到控制台
+        console.log('提交参数：', {
+            score_id: scoreId,
+            student_id: studentId,
+            course_id: courseId,
+            score: newScore
+        });
+
+        // 校验输入
+        if (!newScore) {
+            alert('请输入成绩！');
+            $input.focus();
+            return;
+        }
+        if (newScore < 0 || newScore > 100) {
+            alert('成绩需在 0-100 之间！');
+            $input.focus();
+            return;
+        }
+
+        // 禁用按钮，防止重复提交
+        $btn.prop('disabled', true).text('提交中...');
+
+        // 提交成绩（使用AJAX，加固错误处理）
+        $.ajax({
+            url: '{{ url_for("teacher.submit_score") }}', // 使用url_for避免路径错误
+            type: 'POST',
+            data: {
+                score_id: scoreId,
+                student_id: studentId,
+                course_id: courseId,
+                score: newScore
+            },
+            dataType: 'json',
+            success: function(res) {
+                if (res.code === 200) {
+                    alert(res.msg);
+                    window.location.reload(); // 刷新页面，显示最新成绩
+                } else {
+                    alert('提交失败：' + res.msg);
+                    $btn.prop('disabled', false).text('保存成绩'); // 恢复按钮
+                }
+            },
+            error: function(xhr, status, error) {
+                // 详细错误提示
+                console.error('请求错误：', xhr.responseText, status, error);
+                alert('网络/服务器错误：' + (xhr.responseText || '请检查后端服务！'));
+                $btn.prop('disabled', false).text('保存成绩'); // 恢复按钮
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
