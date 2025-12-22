@@ -1,0 +1,26 @@
+/* main.css */
+
+/* 引入您使用的 CSS 框架，例如 Bootstrap */
+/* 如果您使用外部 CDN，则跳过此步骤 */
+/* 假设您的项目依赖 Bootstrap */
+/* @import url('path/to/bootstrap.min.css'); */
+
+/* 添加一些基本样式以确认加载成功 */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa; /* 浅灰色背景 */
+}
+
+/* 确认侧边栏样式 */
+#wrapper #content-wrapper {
+    background-color: white;
+    padding: 15px;
+}
+
+/* 确认导航栏样式 */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
